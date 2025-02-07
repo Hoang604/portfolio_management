@@ -63,7 +63,7 @@ class Stock:
             sql_query = """
                 UPDATE portfolio_holdings 
                 SET current_quantity = current_quantity + (current_quantity * %s * 0.95),
-                    average_cost = average_cost / (1 + %s),
+                    average_cost = average_cost / (1 + %s * 0.95),
                     update_reason = 'Dividend'
                 WHERE stock_code = %s
             """
