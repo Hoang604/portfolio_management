@@ -23,7 +23,7 @@ class PortfolioApp(tk.Tk):
         self.notebook.add(self.stock_tab, text="Add new Stock")
         self.notebook.add(self.capital_tab, text="Capital Injection")
         self.notebook.add(self.transaction_tab, text="Transaction")
-        self.notebook.add(self.dividen_tab, text="Dividen")
+        self.notebook.add(self.dividen_tab, text="Dividend")
 
         self.notebook.select(self.overall_tab) # Tab mặc định
 
@@ -271,21 +271,26 @@ class DividenTab(ttk.Frame):
         tk.Label(self, text="Select Dividen type:").grid(row=1, column=0, padx=10, pady=5)
         self.div_type_combo, self.get_div_type = self.create_dividen_type_drop_down(self)
         self.div_type_combo.grid(row=1, column=1, padx=10, pady=5)
-        self.div_type_combo.bind("<<ComboboxSelected>>", self.update_dividen_fields)
 
-        self.additional_field_label = tk.Label(self, text="")
-        self.additional_field_label.grid(row=2, column=0, padx=10, pady=5)
+        tk.Label(self, text="Payment date", padx=10, pady=5).grid(row=2, column=0)
+        self.payment_date_entry = tk.Entry(self)
+        self.payment_date_entry.grid(row=2, column=1, padx=10, pady=5)
+
+        self.div_type_combo.bind("<<ComboboxSelected>>", self.update_dividen_fields)
+        self.additional_field_label = tk.Label(self, text="Cash per stock own:")
+        self.additional_field_label.grid(row=3, column=0, padx=10, pady=5)
         self.additional_field_entry = tk.Entry(self)
-        self.additional_field_entry.grid(row=2, column=1, padx=10, pady=5)
+        self.additional_field_entry.grid(row=3, column=1, padx=10, pady=5)
 
         tk.Button(self, text="Save Dividen",
-                  command=self.save_dividen_action).grid(row=3, column=0, columnspan=2, pady=10)
+                  command=self.save_dividen_action).grid(row=4, column=0, columnspan=2, pady=10)
 
     def save_dividen_action(self):
         div_type = self.get_div_type()
         div_amount = self.additional_field_entry.get()
         stock_code = self.get_div_stock_code()
-        self.controller.update_stock_for_dividen(stock_code=stock_code, type=div_type, amount=div_amount)
+        payment_date = self.payment_date_entry.get()
+        self.controller.update_stock_for_dividend(stock_code=stock_code, payment_date=payment_date, type=div_type, amount=div_amount)
 
     def create_stock_dropdown(self, parent):
         stock_codes = self.controller.get_stocks_dropdown_data() # Lấy data từ controller

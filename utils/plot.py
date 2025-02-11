@@ -16,13 +16,22 @@ def get_stock_price(symbol, start="2024-10-18", end=str(datetime.date.today())):
         ic(f"Error processing {symbol}: {e}")
         return pd.DataFrame()
 
-def get_stock_prices():
+def get_stock_prices(user_id):
     """Lấy giá cổ phiếu của tất cả các mã cổ phiếu"""
     dataset = []
     mydb = connect_db()
-    stocks = Stock.get_all(mydb=mydb)
-    stocks = [stock.stock_code for stock in stocks]
-    stocks = ['MBB']
+    cursor = mydb.cursor(dictionary=True)
+    sql_query = """
+        SELECT stock_code
+        from portfolio_holdings
+        where user_id = %s
+    """
+    cursor.execute(sql_query, (user_id,))
+    stocks = cursor.fetchall()
+    stocks = [stock['stock_code'] for stock in stocks]
+    ic(stocks)
+    if not stocks:
+        return dataset
     vnindex = get_stock_price('VNINDEX', start="2024-10-18")
     for stock in stocks:
         df = get_stock_price(stock, start="2024-10-18")
@@ -201,11 +210,13 @@ def prepare_stock_profit(stock_price, user_id):
 pd.set_option('display.max_rows', None)
 
 
-def prepare_data():
-    stock_prices = get_stock_prices()
+def prepare_data(user_id=None):
+    stock_prices = get_stock_prices(user_id)
+    if not stock_prices:
+        return None
     for i in range(len(stock_prices)):
         stock_prices[i] = prepare_stock_price(stock_prices[i])
-        stock_prices[i] = prepare_stock_profit(stock_prices[i], 4)
+        stock_prices[i] = prepare_stock_profit(stock_prices[i], 2)
     df = pd.DataFrame()
     df['time'] = stock_prices[0]['time']
     df['profit'] = 0
@@ -215,13 +226,13 @@ def prepare_data():
         df['profit'] += stock_prices[i]['stock_profit']
         df['vnindex_profit'] += stock_prices[i]['vnindex_profit']
         df['bank_profit'] += stock_prices[i]['bank_profit']
-    # df['profit'] = stock_prices[0]['stock_profit'] + stock_prices[1]['stock_profit'] + stock_prices[2]['stock_profit']
-    # df['vnindex_profit'] = stock_prices[0]['vnindex_profit'] + stock_prices[1]['vnindex_profit'] + stock_prices[2]['vnindex_profit']
-    # df['bank_profit'] = stock_prices[0]['bank_profit'] + stock_prices[1]['bank_profit'] + stock_prices[2]['bank_profit']
     return df
 
 def plot():
-    data = prepare_data()
+    data = prepare_data(user_id=1)
+    if data is None:
+        print("No data to plot")
+        return
     ic(data)
     fig, ax = plt.subplots()
     ax.plot(data['time'], data['profit'], label='My Portfolio Profit', color='green')

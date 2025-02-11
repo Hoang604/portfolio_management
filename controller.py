@@ -71,12 +71,12 @@ class PortfolioController:
             return user.get_portfolio_holdings_view(mydb=self.db)
         return None
     
-    def update_stock_for_dividend(self, stock_code, type=None, amount=None):
+    def update_stock_for_dividend(self, stock_code, payment_date=None, type=None, amount=None):
         stock = Stock.get_by_id(stock_code, self.db)
         if stock:
             if type == 'Cash':
-                stock.cash_dividence(amount=amount, mydb=self.db)
+                stock.cash_dividend(amount=amount, payment_date=payment_date, mydb=self.db)
             elif type == 'Stock':
-                stock.stock_dividence(percentage=amount, mydb=self.db)
+                stock.stock_dividend(numerator=amount, denominator=100, payment_date=payment_date, mydb=self.db)
         else:
             print("Stock not found")

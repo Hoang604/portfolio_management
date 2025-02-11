@@ -55,57 +55,55 @@ class Stock:
             return True
         except mysql.connector.Error as err: print(f"Error deleting Stock: {err}"); mydb.rollback(); return False
 
-    def stock_dividence(self, percentage = None, mydb=None):
-        if not self.stock_code: print("Cannot get dividence without an ID."); return False
-        if not mydb: return False
+    def stock_dividend(self, numerator, denominator, payment_date, mydb=None):
+        if not self.stock_code or not mydb:
+            print("Cannot process dividend without stock code or database connection")
+            return False
+            
         try:
             cursor = mydb.cursor()
             sql_query = """
-                UPDATE portfolio_holdings 
-                SET current_quantity = current_quantity + (current_quantity * %s * 0.95),
-                    average_cost = average_cost / (1 + %s * 0.95),
-                    update_reason = 'Dividend'
-                WHERE stock_code = %s
+                INSERT INTO dividends 
+                (stock_code, payment_date, dividend_type, 
+                 stock_ratio_numerator, stock_ratio_denominator)
+                VALUES (%s, %s, 'Stock', %s, %s)
             """
-            val = (percentage/100, percentage/100, self.stock_code)
-            cursor.execute(sql_query, val)
+            cursor.execute(sql_query, (
+                self.stock_code, 
+                payment_date,
+                numerator,
+                denominator
+            ))
             mydb.commit()
-            print(f"Stock dividence (ID: {self.stock_code})")
+            print(f"Stock dividend recorded for {self.stock_code}")
             return True
-        except mysql.connector.Error as err: print(f"Error getting Stock by ID: {err}"); return None
-
-    def cash_dividence(self, amount = None, mydb=None):    
-        if not self.stock_code: print("Cannot get dividence without an ID."); return False
-        if not mydb: return False
+        except mysql.connector.Error as err:
+            print(f"Error recording stock dividend: {err}")
+            return None
+    
+    def cash_dividend(self, amount, payment_date, mydb=None):
+        if not self.stock_code or not mydb:
+            print("Cannot process dividend without stock code or database connection")
+            return False
+            
         try:
-            users = User.get_all()
             cursor = mydb.cursor()
-            for user in users:
-                user_id = user.user_id
-                sql_query = """
-                    UPDATE users u
-                    JOIN portfolio_holdings ph 
-                        ON u.user_id = ph.user_id 
-                        AND ph.stock_code = %s
-                    SET u.cash_balance = u.cash_balance + (ph.current_quantity * %s * 0.95)
-                    WHERE u.user_id = %s
-                """
-                val = (self.stock_code, amount, user_id)
-                cursor.execute(sql_query, val)
-
             sql_query = """
-                update portfolio_holdings 
-                set
-                average_cost = average_cost - %s,
-                update_reason = 'Dividence'
-                where stock_code = %s"""
-            val = (amount, self.stock_code)
-            cursor.execute(sql_query, val)
+                INSERT INTO dividends 
+                (stock_code, payment_date, dividend_type, cash_amount_per_share)
+                VALUES (%s, %s, 'Cash', %s)
+            """
+            cursor.execute(sql_query, (
+                self.stock_code,
+                payment_date, 
+                amount
+            ))
             mydb.commit()
-            print(f"Stock dividence (ID: {self.stock_code})")
+            print(f"Cash dividend recorded for {self.stock_code}")
             return True
-        except mysql.connector.Error as err: print(f"Error getting Stock by ID: {err}"); return None
-
+        except mysql.connector.Error as err:
+            print(f"Error recording cash dividend: {err}")
+            return None
     def __str__(self):
         return f"Stock(ID: {self.stock_code}, Code: {self.stock_code}, Company: {self.company_name})"
     
