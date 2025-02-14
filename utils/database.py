@@ -7,7 +7,7 @@ def connect_db():
             host="localhost",
             user="Hoang",
             password="Hoangdeptry_05",
-            database="portfolio2"
+            database="portfolio"
         )
         print("Connected to database")
         return mydb

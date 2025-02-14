@@ -161,7 +161,7 @@ class User:
                 WHERE user_id = %s"""
             cursor.execute(sql_query, (self.user_id,))
             db_results = cursor.fetchone()
-            total_investment_value = db_results['total_investment_value'] - cash_balance if db_results else 0
+            total_investment_value = db_results['total_investment_value'] if db_results else 0
             
             sql_query = """
                 SELECT stock_code, current_quantity
@@ -186,8 +186,8 @@ class User:
                 'total_investment_value': total_investment_value,
                 'cash_balance': cash_balance,
                 'total_current_value': total_current_value,
-                'total_profit_in_cash': total_current_value - total_investment_value,
-                'total_profit_in_percentage': ((total_current_value - total_investment_value) / total_investment_value) * 100,
+                'total_profit_in_cash': current_asset_value - total_investment_value,
+                'total_profit_in_percentage': ((current_asset_value - total_investment_value) / total_investment_value) * 100,
                 'total_asset_value': current_asset_value
             }
         except mysql.connector.Error as err:

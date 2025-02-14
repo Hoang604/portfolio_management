@@ -49,7 +49,7 @@ class OverallPerformanceTab(ttk.Frame):
         header_frame.pack(fill='x', padx=5, pady=5)
         tk.Label(header_frame, text="User (ID)", width=20, anchor='w').grid(row=0, column=0)
         tk.Label(header_frame, text="Cash Balance", width=15, anchor='w').grid(row=0, column=1)
-        tk.Label(header_frame, text="Invest Value", width=15, anchor='w').grid(row=0, column=2)
+        tk.Label(header_frame, text="Total injection", width=15, anchor='w').grid(row=0, column=2)
         tk.Label(header_frame, text="Current Value", width=15, anchor='w').grid(row=0, column=3)
         tk.Label(header_frame, text="Total asset", width=15, anchor='w').grid(row=0, column=4)
         tk.Label(header_frame, text="Profit ($)", width=15, anchor='w').grid(row=0, column=5)

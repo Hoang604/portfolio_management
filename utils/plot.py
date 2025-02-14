@@ -216,7 +216,7 @@ def prepare_data(user_id=None):
         return None
     for i in range(len(stock_prices)):
         stock_prices[i] = prepare_stock_price(stock_prices[i])
-        stock_prices[i] = prepare_stock_profit(stock_prices[i], 2)
+        stock_prices[i] = prepare_stock_profit(stock_prices[i], 1)
     df = pd.DataFrame()
     df['time'] = stock_prices[0]['time']
     df['profit'] = 0

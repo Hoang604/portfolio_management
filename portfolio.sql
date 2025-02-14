@@ -1,5 +1,6 @@
-CREATE DATABASE IF NOT EXISTS portfolio2;
-use portfolio2;
+drop DATABASE if exists portfolio;
+CREATE DATABASE IF NOT EXISTS portfolio;
+use portfolio;
 
 CREATE TABLE users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -11,7 +12,7 @@ CREATE TABLE users (
 );
 
 CREATE TABLE stocks (
-    stock_code VARCHAR(20) UNIQUE NOT NULL,
+    stock_code VARCHAR(20) PRIMARY KEY NOT NULL,
     company_name VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -49,8 +50,8 @@ CREATE TABLE dividends (
     payment_date DATE NOT NULL,
     dividend_type VARCHAR(10) NOT NULL CHECK (dividend_type IN ('Cash', 'Stock')),
     cash_amount_per_share DECIMAL(10, 2) NULL,  -- Cho phép giá trị thập phân, ví dụ: 1234.56
-    stock_ratio_numerator INT NULL,
-    stock_ratio_denominator INT NULL,
+    stock_ratio_numerator DECIMAL(15,2) NULL,
+    stock_ratio_denominator DECIMAL(15,2) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (stock_code) REFERENCES stocks(stock_code)  -- Thêm khóa ngoại
@@ -59,7 +60,7 @@ CREATE TABLE dividends (
 CREATE TABLE portfolio_holdings (
     user_id INT NOT NULL,
     stock_code VARCHAR(20) NOT NULL,
-    current_quantity INT NOT NULL DEFAULT 0,
+    current_quantity DECIMAL(15,2) NOT NULL DEFAULT 0,
     average_cost DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -78,7 +79,7 @@ CREATE TRIGGER after_transaction_insert
 AFTER INSERT ON transactions
 FOR EACH ROW
 BEGIN
-    DECLARE current_holdings INT;
+    DECLARE current_holdings DECIMAL(15, 2);
     DECLARE current_avg_cost DECIMAL(15, 2);
     DECLARE transaction_amount DECIMAL(15, 2);
     
@@ -127,7 +128,7 @@ BEGIN
         WHERE user_id = NEW.user_id;
     ELSE
         UPDATE users 
-        SET cash_balance = cash_balance + (transaction_amount * 0.999)
+        SET cash_balance = cash_balance + (transaction_amount * 0.9987)
         WHERE user_id = NEW.user_id;
     END IF;
 END//
@@ -162,7 +163,7 @@ BEGIN
         WHERE user_id = OLD.user_id;
     ELSEIF OLD.transaction_type = 'SELL' THEN
         UPDATE users
-        SET cash_balance = cash_balance - (old_transaction_amount * 0.999)
+        SET cash_balance = cash_balance - (old_transaction_amount * 0.9987)
         WHERE user_id = OLD.user_id;
     END IF;
 
@@ -172,7 +173,7 @@ BEGIN
         WHERE user_id = NEW.user_id;
     ELSEIF NEW.transaction_type = 'SELL' THEN
         UPDATE users
-        SET cash_balance = cash_balance + (new_transaction_amount * 0.999)
+        SET cash_balance = cash_balance + (new_transaction_amount * 0.9987)
         WHERE user_id = NEW.user_id;
     END IF;
 
@@ -190,7 +191,7 @@ BEGIN
         -- Apply new transaction effect
         IF NEW.transaction_type = 'BUY' THEN
             SET @new_total_cost = IFNULL(@old_total_cost, (current_holdings * current_avg_cost)) 
-                               + (new_transaction_amount * 1.0003);
+                            + (new_transaction_amount * 1.0003);
             SET @new_quantity = IFNULL(@old_quantity, current_holdings) + NEW.quantity;
             SET @new_avg_cost = @new_total_cost / @new_quantity;
 
@@ -237,7 +238,7 @@ BEGIN
         WHERE user_id = OLD.user_id;
     ELSEIF OLD.transaction_type = 'SELL' THEN
         UPDATE users
-        SET cash_balance = cash_balance - (transaction_amount * 0.999)
+        SET cash_balance = cash_balance - (transaction_amount * 0.9987)
         WHERE user_id = OLD.user_id;
     END IF;
 
@@ -358,13 +359,13 @@ FOR EACH ROW
 BEGIN
     IF NEW.dividend_type = 'Stock' THEN
         -- Calculate stock dividend percentage
-        SET @percentage = NEW.stock_ratio_numerator / NEW.stock_ratio_denominator;
+        SET @percentage = NEW.stock_ratio_numerator / NEW.stock_ratio_denominator;\
         
         -- Update holdings for stock dividend
         UPDATE portfolio_holdings 
         SET current_quantity = current_quantity * (1 + @percentage * 0.95),
             average_cost = average_cost / (1 + @percentage * 0.95),
-            update_reason = 'Stock Dividend',
+            update_reason = CAST((1 + @percentage * 0.95) AS CHAR),
             updated_at = CURRENT_TIMESTAMP
         WHERE stock_code = NEW.stock_code;
         
@@ -472,3 +473,16 @@ VALUES
 (1,'BUY',76,26080.00,'2025-02-10','HPG'),
 (2,'BUY',149,26080.00,'2025-02-10','HPG'),
 (3,'BUY',17,26080.00,'2025-02-10','HPG');
+
+INSERT INTO capital_injections(user_id, injection_date, amount, description) 
+VALUES 
+(1, '2025-02-13', 340000, 'Góp vốn tháng 2 lần 2'),
+(4, '2025-02-13', 10000000, 'Góp vốn lần 2');
+
+INSERT INTO transactions(user_id, transaction_type, quantity, price_per_share, transaction_date, stock_code)
+VALUES 
+(1, 'BUY', 1, 25500.00, '2025-02-11', 'HPG'),
+(4, 'BUY', 386, 25900.00, '2025-02-13', 'HPG'),
+(1, 'BUY', 12, 25900.00, '2025-02-13', 'HPG');
+
+SELECT * from portfolio_holdings;
