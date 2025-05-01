@@ -1,7 +1,6 @@
 import datetime
 import pandas as pd
 import vnstock3
-from portfolio_management.model.Stock import Stock
 from database import connect_db
 from icecream import ic
 import matplotlib.pyplot as plt
@@ -69,7 +68,7 @@ def prepare_stock_price(stock_price):
         
         if dividend_type == 'Stock':
             ratio = dividend['stock_ratio_numerator'] / dividend['stock_ratio_denominator']
-            stock_price.loc[mask, 'close'] *= (ratio + 1)
+            stock_price.loc[mask, 'close'] *= (float)(ratio + 1)
                 
         elif dividend_type == 'Cash':
             cash_amount = dividend['cash_amount_per_share']
@@ -139,7 +138,7 @@ def prepare_stock_profit(stock_price, user_id):
             current_quantity = ((transactions[insert_index - 1]['total_invest_value'] / 1000) /
                                  transactions[insert_index - 1]['avg_price'])
             if dividend_type == 'Stock':
-                amount = dividend['stock_ratio_numerator'] / dividend['stock_ratio_denominator']
+                amount = float(dividend['stock_ratio_numerator'] / dividend['stock_ratio_denominator'])
                 total_quan = transactions[insert_index - 1]['total_quantity'] * (1 + amount)
                 avg_pric = transactions[insert_index - 1]['avg_price'] / (1 + amount)
                 total_tax = current_quantity * amount * avg_pric * tax

@@ -71,6 +71,15 @@ CREATE TABLE portfolio_holdings (
     CHECK (current_quantity >= 0)
 );
 
+CREATE TABLE stock_prices (
+    date DATE DEFAULT(CURRENT_DATE),
+    stock_code VARCHAR(10) NOT NULL,
+    price FLOAT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (date, stock_code),  -- Khóa chính kết hợp từ date và stock_code
+    FOREIGN KEY (stock_code) REFERENCES stocks(stock_code) ON DELETE CASCADE
+);
+
 -- Tạo trigger để tự động cập nhật portfolio_holdings sau khi thêm transaction mới
 
 DELIMITER //

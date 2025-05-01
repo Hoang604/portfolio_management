@@ -1,7 +1,8 @@
-from portfolio_management.model.User import User
-from portfolio_management.model.Stock import Stock
-from portfolio_management.model.CapitalInjection import CapitalInjection
-from portfolio_management.model.Transaction import Transaction
+from model.User import User
+from model.Stock import Stock
+from model.CapitalInjection import CapitalInjection
+from model.Transaction import Transaction
+from model.CapitalWithdrawal import CapitalWithdrawal
 from icecream import ic
 
 class PortfolioController:
@@ -50,26 +51,6 @@ class PortfolioController:
     def get_stocks_dropdown_data(self):
         stocks = Stock.get_all(self.db)
         return [stock.stock_code for stock in stocks]
-
-    def get_overall_performance_data(self):
-        
-        users = User.get_all(self.db)
-        
-        performance_data = []
-        for user in users:
-            try:
-                
-                user_perf = user.get_overall_perfomance_view(mydb=self.db)
-                performance_data.append(user_perf)
-            except Exception as e:
-                print(f"Error getting performance for user {user.user_id}: {e}")
-        return performance_data
-
-    def get_portfolio_holdings_data(self, user_id):
-        user = User.get_by_id(user_id, self.db)
-        if user:
-            return user.get_portfolio_holdings_view(mydb=self.db)
-        return None
     
     def update_stock_for_dividend(self, stock_code, payment_date=None, type=None, amount=None):
         stock = Stock.get_by_id(stock_code, self.db)
@@ -80,3 +61,10 @@ class PortfolioController:
                 stock.stock_dividend(numerator=amount, denominator=100, payment_date=payment_date, mydb=self.db)
         else:
             print("Stock not found")
+
+    def save_capital_withdrawal(self, user_id, amount, description, withdrawal_date):
+        capital_injection = CapitalWithdrawal(user_id=user_id, amount=amount, description=description, withdrawal_date=withdrawal_date)
+        if capital_injection.save(self.db):
+            print("Capital Withdrawal saved successfully")
+        else:
+            print("Failed to save capital withdrawal")

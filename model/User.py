@@ -1,6 +1,10 @@
 import mysql.connector
-from portfolio_management.utils import database as db
-from portfolio_management.utils import stock_price
+# add utils to path
+import sys
+import os
+sys.path.append("/home/hoang/python/portfolio_management")
+from utils import database as db
+from utils import stock_price
 
 class User:
     def __init__(self, user_id=None, name=None, contact_info=None, cash_balance=0, created_at=None, updated_at=None, update_reason=None):
