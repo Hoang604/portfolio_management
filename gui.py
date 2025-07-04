@@ -101,7 +101,7 @@ class CapitalInjectionTab(ttk.Frame):
         ttk.Label(self, text="Select User:").grid(row=0, column=0, padx=10, pady=10, sticky='w')
         self.capital_user_combo, self.get_capital_user_id = self.create_user_dropdown(self)
         self.capital_user_combo.grid(row=0, column=1, padx=10, pady=10, sticky='ew')
-        ttk.Label(self, text="Amount:").grid(row=1, column=0, padx=10, pady=10, sticky='w')
+        ttk.Label(self, text="Amount (VND):").grid(row=1, column=0, padx=10, pady=10, sticky='w')
         self.capital_amount_entry = ttk.Entry(self)
         self.capital_amount_entry.grid(row=1, column=1, padx=10, pady=10, sticky='ew')
         ttk.Label(self, text="Description:").grid(row=2, column=0, padx=10, pady=10, sticky='w')
@@ -172,7 +172,7 @@ class CapitalWithdrawalTab(ttk.Frame):
         ttk.Label(self, text="Select User:").grid(row=0, column=0, padx=10, pady=10, sticky='w')
         self.capital_user_combo, self.get_capital_user_id = self.create_user_dropdown(self)
         self.capital_user_combo.grid(row=0, column=1, padx=10, pady=10, sticky='ew')
-        ttk.Label(self, text="Amount:").grid(row=1, column=0, padx=10, pady=10, sticky='w')
+        ttk.Label(self, text="Amount (VND):").grid(row=1, column=0, padx=10, pady=10, sticky='w')
         self.capital_amount_entry = ttk.Entry(self)
         self.capital_amount_entry.grid(row=1, column=1, padx=10, pady=10, sticky='ew')
         ttk.Label(self, text="Description:").grid(row=2, column=0, padx=10, pady=10, sticky='w')
@@ -257,7 +257,7 @@ class TransactionTab(ttk.Frame):
         ttk.Label(self, text="Quantity:").grid(row=4, column=0, padx=10, pady=5, sticky='w')
         self.txn_quantity_entry = ttk.Entry(self)
         self.txn_quantity_entry.grid(row=4, column=1, padx=10, pady=5, sticky='ew')
-        ttk.Label(self, text="Price:").grid(row=5, column=0, padx=10, pady=5, sticky='w')
+        ttk.Label(self, text="Price (VND):").grid(row=5, column=0, padx=10, pady=5, sticky='w')
         self.txn_price_entry = ttk.Entry(self)
         self.txn_price_entry.grid(row=5, column=1, padx=10, pady=5, sticky='ew')
         ttk.Button(self, text="Save Transaction",
@@ -449,41 +449,3 @@ class DividenTab(ttk.Frame):
         else:
             self.div_stock_combo.set("No stocks available")
             self.div_stock_combo.config(state='disabled')
-
-# Add refresh methods to PortfolioApp if needed to update dropdowns when users/stocks are added
-# Example:
-# In PortfolioApp.__init__ after creating tabs:
-# self.user_tab.save_callback = self.refresh_user_dropdowns
-# self.stock_tab.save_callback = self.refresh_stock_dropdowns
-
-# def refresh_user_dropdowns(self):
-#     self.capital_tab.refresh_user_dropdown()
-#     self.withdrawal_tab.refresh_user_dropdown()
-#     self.transaction_tab.refresh_user_dropdown()
-
-# def refresh_stock_dropdowns(self):
-#     self.transaction_tab.refresh_stock_dropdown()
-#     self.dividen_tab.refresh_stock_dropdown()
-
-# Then call self.save_callback() within the save_user_action and save_stock_action methods.
-# (This requires adding save_callback=None to the __init__ of UserTab and StockTab
-# and assigning it: self.save_callback = save_callback)
-
-# --- Main Application Logic (if this file is run directly) ---
-# if __name__ == '__main__':
-#     # Assuming you have a Controller class defined elsewhere
-#     # from controller import Controller
-#     # controller = Controller() # Instantiate your controller
-#     class MockController: # Placeholder if Controller is not available
-#         def save_user(self, name, contact): print(f"Saving user: {name}, {contact}")
-#         def save_stock(self, code, name): print(f"Saving stock: {code}, {name}")
-#         def save_capital_injection(self, *args): print(f"Saving capital injection: {args}")
-#         def save_capital_withdrawal(self, *args): print(f"Saving capital withdrawal: {args}")
-#         def save_transaction(self, *args): print(f"Saving transaction: {args}")
-#         def update_stock_for_dividend(self, *args, **kwargs): print(f"Saving dividend: {args}, {kwargs}")
-#         def get_users_dropdown_data(self): return {"User A": 1, "User B": 2} # Sample data
-#         def get_stocks_dropdown_data(self): return ["AAPL", "GOOG", "MSFT"] # Sample data
-
-#     controller = MockController()
-#     app = PortfolioApp(controller)
-#     app.mainloop()

@@ -8,15 +8,21 @@ class Stock:
         self.updated_at = updated_at
 
     def save(self, mydb=None):
-        if not mydb: return False
+        if not mydb: 
+            print("Database connection is required to save a Stock.")
+            return False
         try:
             cursor = mydb.cursor()
-            if self.stock_code is None:
-                sql = "INSERT INTO stocks (stock_code, company_name) VALUES (%s, %s)"
-                val = (self.stock_code, self.company_name)
-            else:
+            # check if stock_code is exists in the database
+            if self.stock_code and Stock.get_by_id(self.stock_code, mydb):
+                print(f"Stock with code {self.stock_code} already exists. Updating...")
                 sql = "UPDATE stocks SET company_name=%s WHERE stock_code=%s"
                 val = (self.company_name, self.stock_code)
+            else:
+                print("Stock code is required to save a Stock.")
+                sql = "INSERT INTO stocks (stock_code, company_name) VALUES (%s, %s)"
+                val = (self.stock_code, self.company_name)
+                
             cursor.execute(sql, val)
             mydb.commit()
             print(f"Stock saved: {self.stock_code}")
